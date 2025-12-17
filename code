@@ -14,9 +14,6 @@ Likelihood <- function(params_vector){
   likelihood <- 0
   df <- df
   
-  #样本量n
-  n <- size1+size2
-  
   for (i in seq(1,n,by=1)) 
   {
     lambda <- g0+g1*df$u[i]
