@@ -1,0 +1,58 @@
+Likelihood <- function(params_vector){
+  
+  a0 <- params_vector[1]
+  a1 <- params_vector[2]
+  a2 <- params_vector[3]
+  b1 <- params_vector[4]
+  g0 <- params_vector[5]
+  g1 <- params_vector[6]
+  s <- params_vector[7]
+  sigma <- params_vector[8]
+  
+  w <- exp(s)/(1+exp(s))
+  
+  likelihood <- 0
+  df <- df
+  
+  #样本量n
+  n <- size1+size2
+  
+  for (i in seq(1,n,by=1)) 
+  {
+    lambda <- g0+g1*df$u[i]
+    
+    NB_model <- dnorm(df$xx[i], mean = lambda, sd = sigma)
+    
+    p_sim_logit_1 <- exp(a0+a1*df$xx[i]+b1*df$z[i])
+    p_sim1 <- p_sim_logit_1/(1+p_sim_logit_1)
+    
+    f1 <- p_sim1^y[i]*(1-p_sim1)^(1-y[i])*(1-w)*NB_model 
+
+    
+    p_sim_logit_2 <- exp(a0+a2+b1*df$z[i])
+    p_sim2 <- p_sim_logit_2/(1+p_sim_logit_2)
+    
+    f2 <- w*p_sim2^y[i]*(1-p_sim2)^(1-y[i])
+    
+
+    f3_y <- function(t){
+      
+      p_sim_logit_3 <- exp(a0+a1*log(t/df$m[i])+b1*df$z[i])
+      p_sim3 <- p_sim_logit_3/(1+p_sim_logit_3)
+      
+      NB_model_t <- (1/t)*dnorm(log(t/df$m[i]), mean = lambda, sd = sigma)
+      
+      return((1-w)*p_sim3^y[i]*(1-p_sim3)^(1-y[i])*NB_model_t)
+      
+    }
+    
+    inte <- integrate(f3_y, lower = 1e-6, upper = L)
+    
+    
+    f3 <- inte$value
+    
+    likelihood <- likelihood+log((f2+f3)^df$c[i])+log(f1^(1-df$c[i]))
+    
+  }
+  return(-likelihood)
+}
